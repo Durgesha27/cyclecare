@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}Something went wrong{% endblock %}
+{% block content %}
+<section class="card auth-card center"><h1>Something went wrong</h1><p>{{ message or '' }}</p>
+<a class="btn btn-primary" href="{{ url_for('dashboard.home') if g.user else url_for('dashboard.index') }}">Go back home</a></section>
+{% endblock %}

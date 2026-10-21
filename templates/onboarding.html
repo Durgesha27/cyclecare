@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Set up{% endblock %}
+{% block content %}
+<section class="card auth-card wide">
+  <h1>Let's set things up</h1>
+  <p>Everything here is optional. You don't need a 28-day cycle: cycles vary naturally, and CycleCare learns from the dates you record.</p>
+  <p class="muted small">What you enter is stored privately in your account, is not medically verified, and can be changed in Settings. We never invent past period dates for you.</p>
+  <form method="post" action="{{ url_for('auth.onboarding') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="last_period_start">Start of your last period</label>
+      <input id="last_period_start" name="last_period_start" type="date" max="{{ today_iso }}" value="{{ form.get('last_period_start','') }}" {% if errors.last_period_start %}aria-describedby="e1"{% endif %}>
+      {% if errors.last_period_start %}<p class="field-error" id="e1">{{ errors.last_period_start }}</p>{% endif %}</div>
+    <div class="field"><label for="typical_cycle_length">Typical cycle length (days)</label>
+      <input id="typical_cycle_length" name="typical_cycle_length" type="number" min="15" max="90" inputmode="numeric" value="{{ form.get('typical_cycle_length','') }}" aria-describedby="h1{% if errors.typical_cycle_length %} e2{% endif %}">
+      <p class="hint" id="h1">Days from the start of one period to the start of the next (15–90). Leave blank if unsure.</p>
+      {% if errors.typical_cycle_length %}<p class="field-error" id="e2">{{ errors.typical_cycle_length }}</p>{% endif %}</div>
+    <div class="field"><label for="typical_period_length">Typical period duration (days)</label>
+      <input id="typical_period_length" name="typical_period_length" type="number" min="1" max="15" inputmode="numeric" value="{{ form.get('typical_period_length','') }}" aria-describedby="{% if errors.typical_period_length %}e3{% endif %}">
+      {% if errors.typical_period_length %}<p class="field-error" id="e3">{{ errors.typical_period_length }}</p>{% endif %}</div>
+    <div class="actions"><button class="btn btn-primary" type="submit">Save and continue</button></div>
+  </form>
+  <form method="post" action="{{ url_for('auth.onboarding_skip') }}" class="skip-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-ghost" type="submit">Skip for now</button>
+  </form>
+</section>
+{% endblock %}

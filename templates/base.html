@@ -1,0 +1,65 @@
+{% from '_icons.html' import icon %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}CycleCare{% endblock %} · CycleCare</title>
+<meta name="description" content="CycleCare: understand your cycle. Care for yourself.">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head>
+<body data-today="{{ today_iso }}"{% if g.user %} class="has-tabbar"{% endif %}>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="{{ url_for('dashboard.home') if g.user else url_for('dashboard.index') }}">{{ icon('flower') }}<span>CycleCare</span></a>
+    {% if g.user %}
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Menu</button>
+    <nav id="main-nav" class="main-nav" aria-label="Main">
+      {% set ep = request.endpoint or '' %}
+      <a href="{{ url_for('dashboard.home') }}" {% if ep == 'dashboard.home' %}aria-current="page"{% endif %}>{{ icon('home') }}Home</a>
+      <a href="{{ url_for('dashboard.calendar') }}" {% if ep == 'dashboard.calendar' %}aria-current="page"{% endif %}>{{ icon('calendar') }}Calendar</a>
+      <a href="{{ url_for('periods.log_period') }}" {% if ep == 'periods.log_period' %}aria-current="page"{% endif %}>{{ icon('drop') }}Log Period</a>
+      <a href="{{ url_for('symptoms.symptoms_page') }}" {% if ep == 'symptoms.symptoms_page' %}aria-current="page"{% endif %}>{{ icon('moon') }}Symptoms</a>
+      <a href="{{ url_for('periods.history') }}" {% if ep == 'periods.history' %}aria-current="page"{% endif %}>{{ icon('list') }}History</a>
+      <a href="{{ url_for('insights.insights_page') }}" {% if ep == 'insights.insights_page' %}aria-current="page"{% endif %}>{{ icon('chart') }}Insights</a>
+      <a href="{{ url_for('settings.settings_page') }}" {% if ep == 'settings.settings_page' %}aria-current="page"{% endif %}>{{ icon('gear') }}Settings</a>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="nav-btn">{{ icon('logout') }}Logout</button>
+      </form>
+    </nav>
+    {% else %}
+    <nav class="main-nav open-always" aria-label="Account">
+      <a href="{{ url_for('auth.login') }}">Login</a>
+      <a class="btn btn-primary btn-sm" href="{{ url_for('auth.signup') }}">Get Started</a>
+    </nav>
+    {% endif %}
+  </div>
+</header>
+<main id="main" class="container">
+  {% if notice %}<div class="alert alert-success" role="status">{{ notice }}</div>{% endif %}
+  <div id="toast" class="alert hidden" role="status" aria-live="polite"></div>
+  {% block content %}{% endblock %}
+</main>
+<footer class="footer">
+  <div class="container">
+    <p><strong>CycleCare</strong> · Understand your cycle. Care for yourself.</p>
+    <p class="muted small">CycleCare provides estimates based only on the dates you record. It is not medical advice and cannot diagnose or predict health conditions.</p>
+    <p class="small"><a href="{{ url_for('dashboard.privacy') }}">Privacy</a> · <a href="{{ url_for('dashboard.about') }}">About &amp; disclaimer</a></p>
+  </div>
+</footer>
+{% if g.user %}
+<nav class="tabbar" aria-label="Quick navigation">
+  <a href="{{ url_for('dashboard.home') }}" {% if request.endpoint == 'dashboard.home' %}aria-current="page"{% endif %}>{{ icon('home') }}<span>Home</span></a>
+  <a href="{{ url_for('dashboard.calendar') }}" {% if request.endpoint == 'dashboard.calendar' %}aria-current="page"{% endif %}>{{ icon('calendar') }}<span>Calendar</span></a>
+  <a class="tab-plus" href="{{ url_for('periods.log_period') }}" aria-label="Log period"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></a>
+  <a href="{{ url_for('periods.history') }}" {% if request.endpoint == 'periods.history' %}aria-current="page"{% endif %}>{{ icon('list') }}<span>History</span></a>
+  <a href="{{ url_for('insights.insights_page') }}" {% if request.endpoint == 'insights.insights_page' %}aria-current="page"{% endif %}>{{ icon('chart') }}<span>Insights</span></a>
+</nav>
+{% endif %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

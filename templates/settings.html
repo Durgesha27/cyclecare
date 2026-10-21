@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<h1>⚙️ Settings</h1>
+<div class="grid grid-2 align-start">
+<section class="card"><h2>Profile</h2>
+  <form method="post" action="{{ url_for('settings.update_profile') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="display_name">Display name</label>
+      <input id="display_name" name="display_name" required maxlength="60" value="{{ g.user.display_name }}">
+      {% if errors.display_name %}<p class="field-error">{{ errors.display_name }}</p>{% endif %}</div>
+    <p class="muted small">Email: {{ g.user.email }}</p>
+    <button class="btn btn-primary" type="submit">Save name</button>
+  </form></section>
+<section class="card"><h2>Cycle preferences</h2>
+  <form method="post" action="{{ url_for('settings.update_preferences') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="typical_cycle_length">Typical cycle length (days)</label>
+      <input id="typical_cycle_length" name="typical_cycle_length" type="number" min="15" max="90" value="{{ prefs.typical_cycle_length if prefs.typical_cycle_length else '' }}">
+      <p class="hint">Used only until your own history provides an estimate.</p>
+      {% if errors.typical_cycle_length %}<p class="field-error">{{ errors.typical_cycle_length }}</p>{% endif %}</div>
+    <div class="field"><label for="typical_period_length">Typical period duration (days)</label>
+      <input id="typical_period_length" name="typical_period_length" type="number" min="1" max="15" value="{{ prefs.typical_period_length if prefs.typical_period_length else '' }}">
+      {% if errors.typical_period_length %}<p class="field-error">{{ errors.typical_period_length }}</p>{% endif %}</div>
+    <label class="check"><input type="checkbox" name="reminders_enabled" value="1" {% if prefs.reminders_enabled in (true, '1', 1) %}checked{% endif %}> Show an in-app reminder on my dashboard when my estimated period is within 3 days</label>
+    <p class="hint">In-app only. CycleCare does not send emails or push notifications.</p>
+    <button class="btn btn-primary" type="submit">Save preferences</button>
+  </form></section>
+<section class="card"><h2>Privacy</h2>
+  <p>Your records are visible only to you. Passwords are stored as salted hashes. <a href="{{ url_for('dashboard.privacy') }}">Read the privacy page</a>.</p>
+  <h3>Export your data</h3><p class="muted">Download all your records as a JSON file.</p>
+  <a class="btn btn-secondary" href="{{ url_for('settings.export') }}">Download my data</a></section>
+<section class="card danger-zone"><h2>Delete my account</h2>
+  <p>This permanently deletes your account, periods, check-ins and preferences. It can't be undone.</p>
+  {% if form_error %}<div class="alert alert-error" role="alert">{{ form_error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('settings.delete_account') }}" data-confirm="Permanently delete your account and all data?">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="del_pw">Your password</label><input id="del_pw" name="password" type="password" required autocomplete="current-password"></div>
+    <div class="field"><label for="del_txt">Type DELETE to confirm</label><input id="del_txt" name="confirm_text" required autocomplete="off"></div>
+    <button class="btn btn-danger" type="submit">Delete everything</button>
+  </form></section>
+</div>
+<form method="post" action="{{ url_for('auth.logout') }}" class="center"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-secondary" type="submit">Log out</button></form>
+{% endblock %}

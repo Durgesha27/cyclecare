@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+<section class="card auth-card">
+  <h1>Create your account</h1>
+  <p class="muted">Takes a minute. You can skip every optional step.</p>
+  <form method="post" action="{{ url_for('auth.signup') }}" novalidate data-signup-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="field"><label for="display_name">Display name</label>
+      <input id="display_name" name="display_name" type="text" maxlength="60" required autocomplete="nickname" value="{{ form.get('display_name','') }}" {% if errors.display_name %}aria-invalid="true" aria-describedby="e-name"{% endif %}>
+      {% if errors.display_name %}<p class="field-error" id="e-name">{{ errors.display_name }}</p>{% endif %}</div>
+    <div class="field"><label for="email">Email</label>
+      <input id="email" name="email" type="email" maxlength="254" required autocomplete="email" value="{{ form.get('email','') }}" {% if errors.email %}aria-invalid="true" aria-describedby="e-email"{% endif %}>
+      {% if errors.email %}<p class="field-error" id="e-email">{{ errors.email }}</p>{% endif %}</div>
+    <div class="field"><label for="password">Password</label>
+      <input id="password" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" aria-describedby="pw-help{% if errors.password %} e-pw{% endif %}">
+      <p class="hint" id="pw-help">At least 8 characters, with a letter and a number.</p>
+      {% if errors.password %}<p class="field-error" id="e-pw">{{ errors.password }}</p>{% endif %}</div>
+    <div class="field"><label for="confirm_password">Confirm password</label>
+      <input id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password" {% if errors.confirm_password %}aria-describedby="e-pw2"{% endif %}>
+      <p class="field-error" id="e-pw2" {% if not errors.confirm_password %}hidden{% endif %}>{{ errors.confirm_password }}</p></div>
+    <button class="btn btn-primary btn-block" type="submit">Create account</button>
+  </form>
+  <p class="center">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+</section>
+{% endblock %}

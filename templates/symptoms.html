@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Daily check-in{% endblock %}
+{% block content %}
+<h1>🌙 Daily check-in</h1>
+<p class="muted">Entirely optional. This is a personal log, not a medical assessment.</p>
+<div class="grid grid-2 align-start">
+<section class="card" aria-labelledby="ci-h">
+  <h2 id="ci-h" data-form-title>New check-in</h2>
+  <div id="form-error" class="alert alert-error hidden" role="alert"></div>
+  <form id="symptom-form" novalidate>
+    <div class="field"><label for="date">Date</label>
+      <input id="date" name="date" type="date" required max="{{ today_iso }}" value="{{ prefill or today_iso }}">
+      <p class="field-error" data-for="date" hidden></p></div>
+    <div class="field"><label for="mood">Mood</label>
+      <select id="mood" name="mood"><option value="">No mood selected</option>{% for m in MOODS %}<option>{{ m }}</option>{% endfor %}</select>
+      <p class="field-error" data-for="mood" hidden></p></div>
+    <fieldset class="field"><legend>Symptoms</legend>
+      <div class="checks">{% for s in SYMPTOMS %}<label class="check"><input type="checkbox" name="symptoms" value="{{ s }}"> {{ s }}</label>{% endfor %}</div>
+      <p class="field-error" data-for="symptoms" hidden></p></fieldset>
+    <div class="field"><label for="severity">Severity <span class="muted">(optional)</span></label>
+      <select id="severity" name="severity"><option value="">Not specified</option>{% for k, v in SEVERITY_LABELS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+      <p class="field-error" data-for="severity" hidden></p></div>
+    <div class="field"><label for="notes">Notes <span class="muted">(optional)</span></label>
+      <textarea id="notes" name="notes" rows="3" maxlength="500"></textarea>
+      <p class="field-error" data-for="notes" hidden></p></div>
+    <div class="actions"><button class="btn btn-primary" type="submit">Save check-in</button>
+      <button class="btn btn-secondary hidden" type="button" id="cancel-edit">Cancel edit</button></div>
+  </form>
+</section>
+<section aria-labelledby="prev-h">
+  <h2 id="prev-h">Previous check-ins</h2>
+  <form method="get" class="filter card" action="{{ url_for('symptoms.symptoms_page') }}">
+    <div class="field"><label for="from">From</label><input id="from" name="from" type="date" value="{{ date_from }}"></div>
+    <div class="field"><label for="to">To</label><input id="to" name="to" type="date" value="{{ date_to }}"></div>
+    <button class="btn btn-secondary btn-sm" type="submit">Filter</button>
+    {% if date_from or date_to %}<a class="btn btn-ghost btn-sm" href="{{ url_for('symptoms.symptoms_page') }}">Clear</a>{% endif %}
+  </form>
+  {% if filter_error %}<div class="alert alert-error" role="alert">{{ filter_error }}</div>{% endif %}
+  {% if entries %}{% for e in entries %}
+  <article class="card entry">
+    <h3>{{ e.date }}</h3>
+    <p>{% if e.mood %}<span class="badge badge-lilac">{{ e.mood }}</span> {% endif %}{% for s in e.symptoms %}<span class="badge">{{ s }}</span> {% endfor %}
+    {% if e.severity %}<span class="muted small">Severity: {{ SEVERITY_LABELS[e.severity] }}</span>{% endif %}</p>
+    {% if e.notes %}<p class="note">{{ e.notes }}</p>{% endif %}
+    <div class="actions"><button type="button" class="btn btn-secondary btn-sm" data-edit-symptom='{{ e|tojson }}'>Edit</button>
+    <button type="button" class="btn btn-danger btn-sm" data-delete-symptom="{{ e.id }}">Delete</button></div>
+  </article>{% endfor %}
+  {% else %}<div class="card empty"><p>{{ 'No check-ins in that range.' if (date_from or date_to) else 'No check-ins yet. Add one whenever you like.' }}</p></div>{% endif %}
+</section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/symptoms.js') }}"></script>{% endblock %}

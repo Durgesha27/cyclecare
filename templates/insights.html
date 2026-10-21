@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Insights{% endblock %}
+{% block content %}
+<h1>✨ Insights</h1>
+<p class="muted">These are observations from the dates you've recorded. They're not medical advice.</p>
+<div class="grid grid-3">
+  <div class="card stat"><span class="stat-label">Periods recorded</span><span class="stat-value">{{ data.recorded_periods }}</span></div>
+  <div class="card stat"><span class="stat-label">Typical cycle interval</span><span class="stat-value">{{ data.typical_cycle_length ~ ' days' if data.typical_cycle_length else '—' }}</span>
+    <span class="hint">Median of recorded intervals{% if data.confidence == 'limited' %} (limited data){% endif %}.</span></div>
+  <div class="card stat"><span class="stat-label">Variation between intervals</span><span class="stat-value">{{ data.variation ~ ' days' if data.variation is not none else '—' }}</span>
+    <span class="hint">{% if data.regularity == 'steady' %}Fairly steady.{% elif data.regularity == 'variable' %}Varies more; this is common.{% else %}Needs more records.{% endif %}</span></div>
+</div>
+{% if data.needs %}<div class="card empty"><p>{{ data.needs }}</p><a class="btn btn-primary" href="{{ url_for('periods.log_period') }}">Log a period</a></div>{% endif %}
+<section class="card" aria-labelledby="c1"><h2 id="c1">Historical cycle intervals</h2>
+  {% if data.cycle_lengths %}
+  <div class="chart-box"><canvas id="cycle-chart" role="img" aria-label="Bar chart of days between recorded period starts"></canvas></div>
+  <div class="table-wrap"><table><caption class="sr-only">Cycle intervals</caption><thead><tr><th scope="col">From</th><th scope="col">To</th><th scope="col">Days</th></tr></thead><tbody>
+  {% for i in data.cycle_lengths %}<tr><td>{{ i.from_date }}</td><td>{{ i.to_date }}</td><td>{{ i.days }}{% if not i.valid %} <span class="badge badge-warn">unusual</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="muted">Not available yet.</p>{% endif %}</section>
+<section class="card" aria-labelledby="c2"><h2 id="c2">Recorded period duration</h2>
+  {% if data.durations %}
+  <div class="chart-box"><canvas id="duration-chart" role="img" aria-label="Bar chart of recorded period durations in days"></canvas></div>
+  <div class="table-wrap"><table><caption class="sr-only">Period durations</caption><thead><tr><th scope="col">Start</th><th scope="col">Days</th></tr></thead><tbody>
+  {% for d in data.durations %}<tr><td>{{ d.start_date }}</td><td>{{ d.days }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="muted">Add end dates to your period records to see durations.</p>{% endif %}</section>
+<section class="card card-lilac"><h2>Looking ahead</h2>
+  {% if a.next_period_start %}<p>Estimated next period start: <strong>{{ a.next_period_start }}</strong>, estimated from {% if a.cycle_length_source == 'history' %}your recorded history{% else %}the cycle length you entered in Settings{% endif %}. This is an estimate, not a guarantee.</p>
+  {% else %}<p class="muted">No estimate yet.</p>{% endif %}</section>
+{% endblock %}
+{% block scripts %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script><script src="{{ url_for('static', filename='js/insights.js') }}"></script>{% endblock %}

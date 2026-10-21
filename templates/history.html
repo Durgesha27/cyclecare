@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Cycle history{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Cycle history</h1>
+  <div class="actions"><a class="btn btn-secondary btn-sm" href="{{ url_for('periods.history', order=('desc' if order == 'asc' else 'asc')) }}">Show {{ 'newest' if order == 'asc' else 'oldest' }} first</a>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('periods.log_period') }}">Log Period</a></div></div>
+{% if not rows %}
+<div class="card empty"><p>No periods recorded yet. Your history will build from the dates you add.</p><a class="btn btn-primary" href="{{ url_for('periods.log_period') }}">Record a period</a></div>
+{% else %}
+<div class="table-wrap card"><table>
+  <caption class="sr-only">Recorded periods</caption>
+  <thead><tr><th scope="col">Start</th><th scope="col">End</th><th scope="col">Duration</th><th scope="col">Cycle interval</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+  <tbody>{% for r in rows %}
+  <tr>
+    <td>{{ r.start_date }}</td>
+    <td>{{ r.end_date or 'Not recorded' }}</td>
+    <td>{{ r.duration_days ~ ' days' if r.duration_days else '—' }}</td>
+    <td>{% if r.interval %}{{ r.interval.days }} days{% if not r.interval.valid %} <span class="badge badge-warn">unusual</span>{% endif %}<span class="hint block">since previous start</span>{% else %}—{% endif %}</td>
+    <td>{% if r.ongoing %}<span class="badge badge-lilac">Ongoing / end not recorded</span>{% else %}<span class="badge">Recorded</span>{% endif %}</td>
+    <td class="row-actions"><a class="btn btn-secondary btn-sm" href="{{ url_for('periods.log_period', id=r.id) }}">Edit</a>
+      <button type="button" class="btn btn-danger btn-sm" data-delete-period="{{ r.id }}" data-reload="1">Delete</button></td>
+  </tr>{% endfor %}</tbody></table></div>
+{% if a.suspicious %}<p class="muted small">Intervals marked "unusual" (outside 15–90 days) are left out of estimates. If one is a typo, edit that record.</p>{% endif %}
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/periods.js') }}"></script>{% endblock %}

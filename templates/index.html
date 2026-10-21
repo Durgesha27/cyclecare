@@ -1,0 +1,30 @@
+{% extends 'base.html' %}{% from '_icons.html' import icon %}
+{% block title %}Welcome{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">🌸 CycleCare</p>
+  <h1>Understand your cycle. Care for yourself.</h1>
+  <p class="lead">A calm, private place to record your periods, check in with how you feel, and see gentle estimates built only from your own dates.</p>
+  <div class="actions">
+    {% if g.user %}<a class="btn btn-primary" href="{{ url_for('dashboard.home') }}">Open my dashboard</a>
+    {% else %}<a class="btn btn-primary" href="{{ url_for('auth.signup') }}">Get Started</a>
+    <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Login</a>{% endif %}
+  </div>
+</section>
+<section aria-labelledby="features-h">
+  <h2 id="features-h">Everything you need, nothing you don't</h2>
+  <div class="grid grid-3">
+    <article class="card"><h3>{{ icon('calendar') }} Calendar</h3><p>See recorded periods and clearly labelled estimates month by month.</p></article>
+    <article class="card"><h3>{{ icon('drop') }} Period log</h3><p>Record start and end dates, or leave the end open while a period is ongoing.</p></article>
+    <article class="card"><h3>{{ icon('moon') }} Daily check-in</h3><p>Optionally note mood and symptoms. Never required.</p></article>
+    <article class="card"><h3>{{ icon('chart') }} Insights</h3><p>Statistics appear only when your real history can support them.</p></article>
+    <article class="card"><h3>{{ icon('list') }} History</h3><p>Review, correct or delete any record you've entered.</p></article>
+    <article class="card"><h3>{{ icon('gear') }} Your data</h3><p>Export everything as JSON or delete your account any time.</p></article>
+  </div>
+</section>
+<section class="card card-lilac" aria-labelledby="privacy-h">
+  <h2 id="privacy-h">🌿 Privacy first</h2>
+  <p>Your records belong to you. Passwords are hashed, every request is protected against forgery, and no one else can open your data. We don't sell it, and you can export or erase it from Settings.</p>
+  <p><a href="{{ url_for('dashboard.privacy') }}">Read how we handle your data</a></p>
+</section>
+{% endblock %}

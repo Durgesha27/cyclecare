@@ -1,0 +1,103 @@
+{% extends 'base.html' %}{% from '_icons.html' import icon %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dash-head">
+  <div><h1>Hello, {{ g.user.display_name }} 🌸</h1>
+  <p class="muted">{{ today.strftime('%A, %B %d, %Y').replace(' 0', ' ') }} · Be gentle with yourself today.</p></div>
+  <a class="btn btn-primary desk-only" href="{{ url_for('periods.log_period') }}">{{ icon('drop') }}Log Period</a>
+</div>
+{% if reminder %}<div class="alert alert-warning" role="status">Reminder: your period is <em>estimated</em> to start {% if a.days_until == 0 %}today{% elif a.days_until == 1 %}tomorrow{% else %}in {{ a.days_until }} days{% endif %}. This is an in-app reminder only; no emails or notifications are sent.</div>{% endif %}
+
+<section class="card tracker" aria-labelledby="pt-h">
+  <h2 id="pt-h" class="tracker-title">Period <span>Tracker</span></h2>
+  <p class="muted small month-label">{{ today.strftime('%B %Y') }}</p>
+  <ol class="week" aria-label="This week">
+    {% for d in week %}
+    <li class="week-day{% if d.today %} is-today{% endif %}{% if d.kind %} is-{{ d.kind }}{% endif %}">
+      <span class="wd-name">{{ d.name }}</span>
+      <a class="wd-num" href="{{ url_for('dashboard.calendar') }}" aria-label="{{ d.name }} {{ d.num }}{% if d.today %}, today{% endif %}{% if d.label %}, {{ d.label }}{% endif %}">{{ d.num }}</a>
+    </li>{% endfor %}
+  </ol>
+
+  {% if a.status == 'no_data' %}
+  <div class="empty-inline"><p>Start by recording a period to build your cycle history.</p>
+    <a class="btn btn-primary" href="{{ url_for('periods.log_period') }}">Record your first period</a></div>
+  {% elif ring %}
+  <div class="ring" role="img" aria-label="Cycle ring: day {{ ring.day }} of an estimated {{ ring.length }}-day cycle">
+    <svg viewBox="0 0 220 220" aria-hidden="true" focusable="false">
+      <circle class="ring-track" cx="110" cy="110" r="90" fill="none" stroke-width="16"/>
+      {% for s in ring.segs %}<circle class="{{ s.cls }}" cx="110" cy="110" r="90" fill="none" stroke-width="16" transform="rotate(-90 110 110)" stroke-dasharray="{{ s.dash }} {{ s.gap }}" stroke-dashoffset="{{ s.offset }}"/>{% endfor %}
+      <circle class="ring-marker" cx="{{ ring.mx }}" cy="{{ ring.my }}" r="14"/>
+      <text class="ring-marker-text" x="{{ ring.mx }}" y="{{ ring.my + 4 }}" text-anchor="middle">{{ ring.day }}</text>
+    </svg>
+    <div class="ring-center">
+      <span class="ring-date">{{ a.next_period_start }}</span>
+      {% if a.days_until > 0 %}<strong>{{ a.days_until }} day{{ '' if a.days_until == 1 else 's' }} until next period</strong>
+      {% elif a.days_until == 0 %}<strong>Period estimated today</strong>
+      {% else %}<strong>Estimate passed {{ -a.days_until }} day{{ '' if a.days_until == -1 else 's' }} ago</strong>{% endif %}
+      <span class="ring-note">Estimate · cycles vary</span>
+    </div>
+  </div>
+  <ul class="legend ring-legend" aria-label="Ring legend">
+    {% if ring.has_period_seg %}<li><span class="swatch swatch-ring-period"></span> Typical period days</li>{% endif %}
+    <li><span class="swatch swatch-ring-mid"></span> Rest of cycle</li>
+    <li><span class="swatch swatch-ring-pre"></span> Days before estimated start</li>
+  </ul>
+  {% else %}
+  <div class="empty-inline"><p>Record one more period start (or set a typical cycle length in Settings) to see your cycle ring.</p>
+    <a class="btn btn-secondary" href="{{ url_for('periods.log_period') }}">Log a period</a></div>
+  {% endif %}
+
+  {% if a.status != 'no_data' %}
+  <div class="grid grid-4 stats">
+    <div class="stat"><span class="stat-label">Last period started</span><span class="stat-value">{{ a.latest_start }}</span></div>
+    <div class="stat"><span class="stat-label">Current cycle day</span><span class="stat-value">{{ a.cycle_day if a.cycle_day else '—' }}</span>
+      {% if not a.cycle_day %}<span class="hint">Not available: your last recorded start is too long ago.</span>{% endif %}</div>
+    <div class="stat"><span class="stat-label">Next period (estimate)</span>
+      <span class="stat-value">{{ a.next_period_start if a.next_period_start else '—' }}</span>
+      {% if a.days_until is not none %}<span class="hint">{% if a.days_until > 0 %}About {{ a.days_until }} day{{ '' if a.days_until == 1 else 's' }} away{% elif a.days_until == 0 %}Estimated today{% else %}Estimate passed; cycles vary{% endif %}</span>
+      {% else %}<span class="hint">Needs one more recorded start.</span>{% endif %}</div>
+    <div class="stat"><span class="stat-label">Estimated cycle length</span><span class="stat-value">{{ a.estimated_cycle_length ~ ' days' if a.estimated_cycle_length else '—' }}</span>
+      {% if a.cycle_length_source == 'preference' %}<span class="hint">From your Settings, not yet from history.</span>
+      {% elif a.confidence == 'limited' %}<span class="hint">Based on a single interval; limited confidence.</span>{% endif %}</div>
+  </div>
+  <p class="muted small">Dates ahead are estimates, not guarantees.</p>
+  {% endif %}
+</section>
+
+<section class="card" aria-labelledby="qo-h">
+  <h2 id="qo-h">Quick overview <span class="muted">· Today</span></h2>
+  <div class="chips">
+    {% if checkin %}
+      {% if checkin.mood %}<a class="chip" href="{{ url_for('symptoms.symptoms_page', **{'from': today_iso, 'to': today_iso}) }}"><span class="chip-ico c-orange">😊</span><span>{{ checkin.mood }}</span></a>{% endif %}
+      {% for s in checkin.symptoms[:3] %}<a class="chip" href="{{ url_for('symptoms.symptoms_page', **{'from': today_iso, 'to': today_iso}) }}"><span class="chip-ico c-teal">{{ icon('drop') }}</span><span>{{ s }}</span></a>{% endfor %}
+      {% if not checkin.mood and not checkin.symptoms %}<a class="chip" href="{{ url_for('symptoms.symptoms_page', **{'from': today_iso, 'to': today_iso}) }}"><span class="chip-ico c-purple">{{ icon('moon') }}</span><span>Note saved</span></a>{% endif %}
+    {% endif %}
+    <a class="chip chip-add" href="{{ url_for('symptoms.symptoms_page', date=today_iso) }}"><span class="chip-ico c-pink">{{ icon('moon') }}</span><span>{{ 'Edit check-in' if checkin else 'Log today' }}</span></a>
+  </div>
+  {% if not checkin %}<p class="muted small">No check-in yet today. It's always optional.</p>{% endif %}
+</section>
+
+<section class="grid grid-2" aria-label="Recent activity">
+  <div class="card"><h2>Recent periods</h2>
+    {% if periods %}<ul class="plain-list">{% for p in periods %}
+      <li><span>{{ p.start_date }}{% if p.end_date %} → {{ p.end_date }}{% else %} · <em>ongoing / end not recorded</em>{% endif %}</span>
+      <a href="{{ url_for('periods.log_period', id=p.id) }}">Edit</a></li>{% endfor %}</ul>
+    {% else %}<p class="muted">No periods recorded yet.</p>{% endif %}</div>
+  <div class="card"><h2>Recent check-ins</h2>
+    {% if symptoms %}<ul class="plain-list">{% for s in symptoms %}
+      <li><span>{{ s.date }}{% if s.mood %} · {{ s.mood }}{% endif %}{% if s.symptoms %} · {{ s.symptoms|join(', ') }}{% endif %}</span>
+      <a href="{{ url_for('symptoms.symptoms_page', **{'from': s.date, 'to': s.date}) }}">View</a></li>{% endfor %}</ul>
+    {% else %}<p class="muted">No check-ins yet. They're always optional.</p>{% endif %}</div>
+</section>
+
+<section class="card" aria-labelledby="is-h">
+  <h2 id="is-h">✨ Insights summary</h2>
+  {% if a.valid_intervals %}
+    <p>{{ a.record_count }} periods recorded · {{ a.valid_intervals|length }} cycle interval{{ '' if a.valid_intervals|length == 1 else 's' }} measured.
+    {% if a.regularity == 'steady' %}Your recorded intervals have been fairly steady (within {{ a.variation }} days of each other).
+    {% elif a.regularity == 'variable' %}Your recorded intervals vary by up to {{ a.variation }} days, which is common.{% endif %}</p>
+    <a href="{{ url_for('insights.insights_page') }}">See all insights</a>
+  {% else %}<p class="muted">Insights appear after you've recorded at least two period start dates.</p>{% endif %}
+</section>
+{% endblock %}

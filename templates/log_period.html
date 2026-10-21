@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit period' if record else 'Log period' }}{% endblock %}
+{% block content %}
+<section class="card auth-card wide">
+  <h1>{{ 'Edit period' if record else '💗 Log a period' }}</h1>
+  <p class="muted">Leave the end date blank if your period is ongoing; you can add it later.</p>
+  <div id="form-error" class="alert alert-error hidden" role="alert"></div>
+  <form id="period-form" novalidate data-id="{{ record.id if record else '' }}" data-max-days="15">
+    <div class="field"><label for="start_date">Period start date</label>
+      <input id="start_date" name="start_date" type="date" required max="{{ today_iso }}" value="{{ record.start_date if record else prefill }}">
+      <p class="field-error" data-for="start_date" hidden></p></div>
+    <div class="field"><label for="end_date">Period end date <span class="muted">(optional)</span></label>
+      <input id="end_date" name="end_date" type="date" max="{{ today_iso }}" value="{{ record.end_date if record and record.end_date else '' }}">
+      <p class="field-error" data-for="end_date" hidden></p></div>
+    <div class="field"><label for="notes">Notes <span class="muted">(optional)</span></label>
+      <textarea id="notes" name="notes" rows="3" maxlength="500">{{ record.notes if record and record.notes else '' }}</textarea>
+      <p class="field-error" data-for="notes" hidden></p></div>
+    <div class="actions">
+      <button class="btn btn-primary" type="submit" id="save-btn">Save Period</button>
+      <a class="btn btn-secondary" href="{{ url_for('periods.history') }}">Cancel</a>
+      {% if record %}<button type="button" class="btn btn-danger" data-delete-period="{{ record.id }}" data-redirect="{{ url_for('periods.history') }}">Delete</button>{% endif %}
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/periods.js') }}"></script>{% endblock %}

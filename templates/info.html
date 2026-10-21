@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Privacy' if page == 'privacy' else 'About' }}{% endblock %}
+{% block content %}
+<article class="card prose">
+{% if page == 'privacy' %}
+<h1>🌿 Privacy</h1>
+<p>CycleCare stores only what you give it: your name, email, a hashed password, the period dates and check-ins you record, and your preferences.</p>
+<ul><li>Records are tied to your account; other users can never open them.</li>
+<li>Passwords are hashed, never stored in plain text.</li>
+<li>Nothing is sold or shared.</li>
+<li>Settings lets you download everything as JSON, or permanently delete your account and all related data.</li></ul>
+{% else %}
+<h1>About &amp; disclaimer</h1>
+<p>CycleCare helps you log periods and notice your own patterns. Predictions are <strong>estimates</strong> derived from your recorded dates. They are not guarantees and are not a diagnosis. CycleCare makes no claims about fertility, pregnancy or medical conditions. Talk to a healthcare professional about any health concern.</p>
+{% endif %}
+<p><a href="{{ url_for('dashboard.index') }}">Back to home</a></p>
+</article>
+{% endblock %}

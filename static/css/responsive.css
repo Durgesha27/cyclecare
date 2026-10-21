@@ -1,0 +1,15 @@
+@media (max-width:900px){
+  .grid-4{grid-template-columns:repeat(2,1fr)} .grid-3{grid-template-columns:repeat(2,1fr)}
+  .calendar-layout{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .nav-toggle{display:inline-flex;padding:.45rem 1rem;border-radius:999px;border:1px solid var(--blush);background:#fff;font:inherit;color:var(--plum);cursor:pointer;min-height:40px}
+  .main-nav:not(.open-always){display:none;width:100%;flex-direction:column;align-items:stretch;padding-bottom:.5rem}
+  .main-nav.open{display:flex}
+  .main-nav.open a,.main-nav.open .nav-btn{width:100%;border-radius:12px}
+  .hero{padding:2rem 1rem} .checks{grid-template-columns:1fr}
+  .cal-cell{min-height:40px;padding:.2rem .3rem;font-size:.85rem}
+  .row-actions{white-space:normal}
+}
+@media (max-width:420px){ .grid-4{grid-template-columns:1fr} .btn{width:100%} .actions .btn-sm{width:auto} }

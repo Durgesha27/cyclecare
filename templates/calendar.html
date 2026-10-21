@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+<h1>🗓️ Calendar</h1>
+<div class="calendar-layout">
+  <section class="card" aria-labelledby="cal-title">
+    <div class="cal-head">
+      <button type="button" class="btn btn-secondary btn-sm" id="cal-prev" aria-label="Previous month">‹ Prev</button>
+      <h2 id="cal-title" aria-live="polite"></h2>
+      <button type="button" class="btn btn-secondary btn-sm" id="cal-next" aria-label="Next month">Next ›</button>
+    </div>
+    <div class="cal-tools"><button type="button" class="btn btn-ghost btn-sm" id="cal-today">Today</button></div>
+    <div id="cal-error" class="alert alert-error hidden" role="alert"></div>
+    <div class="cal-grid cal-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    <div id="cal-grid" class="cal-grid" aria-labelledby="cal-title"></div>
+    <ul class="legend" aria-label="Legend">
+      <li><span class="swatch swatch-period"></span> Recorded period</li>
+      <li><span class="swatch swatch-predicted"></span> Estimated (not confirmed)</li>
+      <li><span class="swatch swatch-symptom"></span> Check-in logged</li>
+      <li><span class="swatch swatch-today"></span> Today</li>
+    </ul>
+  </section>
+  <aside class="card" id="cal-detail" aria-live="polite"><h2>Select a date</h2><p class="muted">Choose a day to see or add records.</p></aside>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>{% endblock %}
