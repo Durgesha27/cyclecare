@@ -10,7 +10,7 @@ from services.cycle_calculator import today_date
 try:
     from dotenv import load_dotenv
     load_dotenv()
-except ImportError:  # optional dependency
+except ImportError:
     pass
 
 NOTICES = {
@@ -20,8 +20,11 @@ NOTICES = {
     "account_deleted": "Your account and all of its data have been deleted.",
 }
 
-
 def _secret_key(app):
+    # VERCEL FIX: Don't write file on Vercel
+    if os.environ.get('VERCEL'):
+        return os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+    
     if app.config.get("SECRET_KEY"):
         return app.config["SECRET_KEY"]
     path = os.path.join(os.path.dirname(os.path.abspath(app.config["DATABASE"])), "secret_key")
@@ -34,12 +37,16 @@ def _secret_key(app):
     os.chmod(path, 0o600)
     return key
 
-
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object(Config)
     if test_config:
         app.config.update(test_config)
+
+    # VERCEL FIX: Use /tmp for database on Vercel
+    if os.environ.get('VERCEL'):
+        app.config["DATABASE"] = "/tmp/cyclecare.db"
+
     os.makedirs(os.path.dirname(os.path.abspath(app.config["DATABASE"])), exist_ok=True)
     app.config["SECRET_KEY"] = _secret_key(app)
 
@@ -86,21 +93,17 @@ def create_app(test_config=None):
     @app.errorhandler(403)
     def _403(_e):
         return _err(403, "403.html", "You don't have permission to view this page.")
-
     @app.errorhandler(404)
     def _404(_e):
         return _err(404, "404.html", "We couldn't find that page.")
-
     @app.errorhandler(413)
     def _413(_e):
         return _err(413, "500.html", "That request was too large.")
-
     @app.errorhandler(500)
     def _500(_e):
         return _err(500, "500.html", "Something went wrong on our side. Please try again.")
 
     return app
-
 
 app = create_app()
 
